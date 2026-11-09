@@ -1,2 +1,35 @@
 # Oscillating-Word-Storage
 Word storage that oscillates 4-letter words on a singular SSD under a 555 timer clock, with complete ALU and RAM8 word storage.
+
+## 🔑 Key Engineering Concepts
+
+### 1. Clock Domain Crossing (CDC) & Metastability Protection
+The display counter runs on an independent slow clock (`slow_clk`), simulating an external 555-timer relaxation oscillator. To pass this counter value into the main clock domain (`clk`) safely:
+* **Gray Code Encoding:** The counter increments using Gray code (`00` -> `01` -> `11` -> `10`), ensuring **only one bit changes per clock cycle**.
+* **2-Flop Synchronizer:** A 2-stage flip-flop synchronizer (`cdc_sync2`) synchronizes the Gray code across domains, eliminating multi-bit bus skew hazards and metastability.
+
+### 2. Concatenated Datapath Multiplexing
+Instead of storing multi-character words in separate memory locations, four 5-bit character codes are packed into a single 20-bit vector. A 4-to-1 chunk multiplexer selects slices (`word_in[pos*5 +: 5]`) to feed the active-low character decoder.
+
+## 📁 Repository Structure
+
+text
+├── rtl/
+│   ├── alu20.sv                 # 20-bit Hack-style ALU
+│   ├── register20.sv            # 20-bit general-purpose registers
+│   ├── ram8_20bit.sv            # 8-word x 20-bit RAM memory
+│   ├── debounce_pulse.sv        # Button debouncer & edge detector
+│   ├── gray_position_counter.sv # Asynchronous Gray code counter
+│   ├── cdc_sync2.sv             # 2FF CDC Synchronizer
+│   ├── chunk_mux.sv             # 5-bit slice selector
+│   ├── char_decoder.sv          # 5-bit to 7-segment display decoder
+│   └── join_ssd_top.sv          # Top-level system wrapper
+├── tb/
+│   └── join_ssd_tb.sv           # Self-checking simulation testbench
+└── README.md
+🚀 How to Run Simulation
+Using Icarus Verilog & GTKWave
+Bash
+iverilog -g2012 -o sim_out rtl/*.sv tb/join_ssd_tb.sv
+vvp sim_out
+gtkwave wave.vcd
