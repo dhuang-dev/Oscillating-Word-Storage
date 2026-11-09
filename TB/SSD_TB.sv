@@ -4,7 +4,7 @@
 
 `timescale 1ns/1ps
 
-module join_ssd_tb;
+module ssd_tb;
     logic        clk = 0;
     logic        rst_n = 0;
     logic        slow_clk = 0;
@@ -19,7 +19,7 @@ module join_ssd_tb;
     logic [6:0]  segments;
     logic        zero_led, neg_led;
 
-    join_ssd_top DUT (.*);
+    ssd_top DUT (.*);
 
     // Override debouncer STABLE_CYCLES for fast simulation
     defparam DUT.u_db_d.STABLE_CYCLES  = 2;
