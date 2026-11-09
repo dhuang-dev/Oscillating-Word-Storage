@@ -1,6 +1,14 @@
 # Oscillating-Word-Storage
 Word storage that oscillates 4-letter words on a singular SSD under a 555 timer clock, with complete ALU and RAM8 word storage.
 
+# Asynchronous Multi-Clock Word Display System (JOIN v2)
+
+An FPGA-targeted digital system written in SystemVerilog that stores multi-character word payloads into RAM and cycles their display across an asynchronous clock-domain boundary on a single 7-segment display (SSD).
+
+## 📌 Architecture Overview
+
+The system processes **20-bit words**, where each word stores four concatenated **5-bit character indices** ($4 \text{ letters} \times 5 \text{ bits/letter} = 20 \text{ bits}$). This provides a full 32-character alphabet capability (A–Z plus custom symbols).
+
 ## 🔑 Key Engineering Concepts
 
 ### 1. Clock Domain Crossing (CDC) & Metastability Protection
@@ -10,6 +18,18 @@ The display counter runs on an independent slow clock (`slow_clk`), simulating a
 
 ### 2. Concatenated Datapath Multiplexing
 Instead of storing multi-character words in separate memory locations, four 5-bit character codes are packed into a single 20-bit vector. A 4-to-1 chunk multiplexer selects slices (`word_in[pos*5 +: 5]`) to feed the active-low character decoder.
+
++------------------+     +------------+     +---------+     +----------+
+| 20-bit Switches  |---->| Reg A / D  |---->| ALU 20  |---->| RAM8     |
++------------------+     +------------+     +---------+     |(20-bit)  |
+                                                            +----------+
+| (display_word)
+v
+
++------------------+     +------------+     +---------+  +------------+  +---------+
+| slow_clk (555)   |---->| Gray Pos   |---->| 2FF CDC |--| Chunk Mux  |->| 7-Seg   |
+| Asynchronous Domain|   | Counter    |     | Sync    |  | (5-bit)    |  | Decoder |
++------------------+     +------------+     +---------+  +------------+  +---------+
 
 ## 📁 Repository Structure
 
@@ -27,6 +47,7 @@ text
 ├── tb/
 │   └── join_ssd_tb.sv           # Self-checking simulation testbench
 └── README.md
+
 🚀 How to Run Simulation
 Using Icarus Verilog & GTKWave
 Bash
