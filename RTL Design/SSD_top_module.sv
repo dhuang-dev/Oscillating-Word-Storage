@@ -11,7 +11,7 @@ module join_ssd_top (
     // Mode Selector: 0 = Manual Pushbuttons/Switches, 1 = Host SPI Interface
     input  logic        input_mode_sel,
 
-    // ANUAL / HARDWARE INTERFACE 
+    // ANUAL / HARDWARE INTERFACE
     input  logic [19:0] data_switches, // 4 x 5-bit character indices
     input  logic [2:0]  ram_address,
     input  logic        alu_zx, alu_nx, alu_zy, alu_ny, alu_f, alu_no,
