@@ -37,15 +37,15 @@ text
 ├── rtl/
 │   ├── alu20.sv                 # 20-bit Hack-style ALU
 │   ├── register20.sv            # 20-bit general-purpose registers
-│   ├── ram8_20bit.sv            # 8-word x 20-bit RAM memory
+│   ├── RAM8_20bit.sv            # 8-word x 20-bit RAM memory
 │   ├── debounce_pulse.sv        # Button debouncer & edge detector
-│   ├── gray_position_counter.sv # Asynchronous Gray code counter
-│   ├── cdc_sync2.sv             # 2FF CDC Synchronizer
-│   ├── chunk_mux.sv             # 5-bit slice selector
-│   ├── char_decoder.sv          # 5-bit to 7-segment display decoder
+│   ├── graycodes_and_CDCs.sv # Asynchronous Gray code counter and 2FF CDC Sync
+│   ├── nibble_mux_select.sv     # 5-bit slice selector
+│   ├── character_decoder.sv     # 5-bit to 7-segment display decoder
 │   └── join_ssd_top.sv          # Top-level system wrapper
 ├── tb/
-│   └── join_ssd_tb.sv           # Self-checking simulation testbench
+│   └── SSD_TB.sv           # Self-checking simulation testbench
+│   └── SPI_Slave.sv             # SPI_Slave for computer interface
 └── README.md
 
 ### **3. Two Ways to Run the Device**
