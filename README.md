@@ -48,6 +48,19 @@ text
 │   └── join_ssd_tb.sv           # Self-checking simulation testbench
 └── README.md
 
+### **3. Two Ways to Run the Device**
+There are two ways we can view this project. First, on a physical FPGA, we have to manually adjust data switches and load pushbuttons to manually drive inputs with fingers to change the word we want on the SSD. Second, we can use a computer system to program new 4 letter words into the 20-bit RAM8 memory through Python, Arduino/Raspberry Pi, or other microcontrollers with software instructions.
+
++--------------------------+
+ | Physical Switches/Btns   |-------\
+ +--------------------------+        \     +------------------+     +------------------+
+                                      ====>| Input Select Mux |====>| Processor /      |
+ +--------------------------+        /     +------------------+     | Datapath         |
+ | SPI Slave Subsystem      |-------/               ^               | (A, D, RAM8)     |
+ | (sclk, cs_n, mosi, miso) |                       |               +------------------+
+ +--------------------------+                 Mode Switch
+                                          (0 = Manual, 1 = SPI)
+
 🚀 How to Run Simulation
 Using Icarus Verilog & GTKWave
 Bash
