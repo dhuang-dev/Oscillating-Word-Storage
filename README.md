@@ -19,47 +19,56 @@ The display counter runs on an independent slow clock (`slow_clk`), simulating a
 ### 2. Concatenated Datapath Multiplexing
 Instead of storing multi-character words in separate memory locations, four 5-bit character codes are packed into a single 20-bit vector. A 4-to-1 chunk multiplexer selects slices (`word_in[pos*5 +: 5]`) to feed the active-low character decoder.
 
-+------------------+     +------------+     +---------+     +----------+
-| 20-bit Switches  |---->| Reg A / D  |---->| ALU 20  |---->| RAM8     |
-+------------------+     +------------+     +---------+     |(20-bit)  |
-                                                            +----------+
-| (display_word)
-v
 
-+------------------+     +------------+     +---------+  +------------+  +---------+
+| 20-bit Switches  |---->| Reg A / D  |---->| ALU 20  |---->| RAM8     |
+                                                            |(20-bit)  |
+                                                           
+                                                            
+(display_word) ->
+
+
+
 | slow_clk (555)   |---->| Gray Pos   |---->| 2FF CDC |--| Chunk Mux  |->| 7-Seg   |
 | Asynchronous Domain|   | Counter    |     | Sync    |  | (5-bit)    |  | Decoder |
-+------------------+     +------------+     +---------+  +------------+  +---------+
+
 
 ## 📁 Repository Structure
 
 text
 ├── rtl/
+
 │   ├── alu20.sv                 # 20-bit Hack-style ALU
+
 │   ├── register20.sv            # 20-bit general-purpose registers
+
 │   ├── RAM8_20bit.sv            # 8-word x 20-bit RAM memory
+
 │   ├── debounce_pulse.sv        # Button debouncer & edge detector
+
 │   ├── graycodes_and_CDCs.sv # Asynchronous Gray code counter and 2FF CDC Sync
+
 │   ├── nibble_mux_select.sv     # 5-bit slice selector
+
 │   ├── character_decoder.sv     # 5-bit to 7-segment display decoder
+
 │   └── join_ssd_top.sv          # Top-level system wrapper
+
 ├── tb/
+
 │   └── SSD_TB.sv           # Self-checking simulation testbench
+
 │   └── SPI_Slave.sv             # SPI_Slave for computer interface
+
 └── README.md
 
 ### **3. Two Ways to Run the Device**
 There are two ways we can view this project. First, on a physical FPGA, we have to manually adjust data switches and load pushbuttons to manually drive inputs with fingers to change the word we want on the SSD. Second, we can use a computer system to program new 4 letter words into the 20-bit RAM8 memory through Python, Arduino/Raspberry Pi, or other microcontrollers with software instructions.
 
-+--------------------------+
- | Physical Switches/Btns   |-------\
- +--------------------------+        \     +------------------+     +------------------+
-                                      ====>| Input Select Mux |====>| Processor /      |
- +--------------------------+        /     +------------------+     | Datapath         |
- | SPI Slave Subsystem      |-------/               ^               | (A, D, RAM8)     |
- | (sclk, cs_n, mosi, miso) |                       |               +------------------+
- +--------------------------+                 Mode Switch
-                                          (0 = Manual, 1 = SPI)
+Option 1:
+Physical Switches/Btns -----> Input Select Mux (0 = Manual, 1 = SPI) -----> Processor/Datapath (A, D, RAM8)
+
+Option 2:
+SPI Slave Subsystem (silk, cs_n, mosi, miso) -----> Input Select Mux (0 = Manual, 1 = SPI) ------> Processor/Datapath (A, D, RAM8)
 
 🚀 How to Run Simulation
 Using Icarus Verilog & GTKWave
