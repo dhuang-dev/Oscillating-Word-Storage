@@ -1,6 +1,6 @@
 `default_nettype none
 
-module join_ssd_top (
+module SSD_top_module (
     input  logic        clk,
     input  logic        rst_n,
 
