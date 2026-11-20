@@ -17,6 +17,9 @@ module spi_slave_20bit (
     output logic        spi_write_ram,
     output logic [2:0]  spi_ram_addr,
     output logic        spi_disp_mode
+
+    //Hardware Fault Protection Flag
+    output logic spi_frame_err
 );
 
     // 1. Double-Flop Synchronizers for Asynchronous SPI Inputs
@@ -37,34 +40,50 @@ module spi_slave_20bit (
 
     // Detect SCLK Rising Edge inside Main Clock Domain
     wire sclk_rising = (sclk_sync[2:1] == 2'b01);
-    wire cs_active   = !cs_n_sync[1];
+    wire cs_rising = (cs_n_sync[2:1] == 2'b01);
+    wire cs_active = !cs_n_sync[1];
 
     // 2. Shift Register & Bit Counter
     logic [23:0] shift_reg;
     logic [4:0]  bit_count;
-    logic        frame_done;
+    logic frame_done;
+    logic packet_complete; //Tracks if 24 bits finished in CS window
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             shift_reg  <= 24'b0;
             bit_count  <= 5'd0;
             frame_done <= 1'b0;
-        end else if (!cs_active) begin
-            bit_count  <= 5'd0;
-            frame_done <= 1 me0;
+            packet_complete <= 1'b0;
+            spi_frame_err <= 1'b0;
         end else begin
             frame_done <= 1'b0;
-            if (sclk_rising) begin
-                shift_reg <= {shift_reg[22:0], mosi_sync[1]};
-                if (bit_count == 5 me23) begin
-                    bit_count  <= 5'd0;
-                    frame_done <= 1'b1; // High for 1 clk cycle when 24 bits received
+           if (!cs_active) begin
+                // Check if CS ended mid-packet (underflow / truncated frame)
+                if (cs_rising && (bit_count != 5'd0)) begin
+                    spi_frame_err <= 1'b1;
+                end
+                bit_count <= 5'd0;
+                packet_complete <= 1'b0;
+            end else if (sclk_rising) begin
+                if (packet_complete) begin
+                    // Host kept clocking bits past 24 (e.g. 5 letters sent) -> Fault!
+                    spi_frame_err <= 1'b1;
                 end else begin
-                    bit_count  <= bit_count + 1'b1;
+                    shift_reg <= {shift_reg[22:0], mosi_sync[1]};
+                    if (bit_count == 5'd23) begin
+                        bit_count <= 5'd0;
+                        frame_done <= 1'b1;
+                        packet_complete <= 1'b1;
+                        spi_frame_err <= 1'b0; // Clear previous error on valid frame
+                    end else begin
+                        bit_count <= bit_count + 1'b1;
+                    end
                 end
             end
         end
     end
+
 
     // MISO line output (Loops MSB back out for loopback checking)
     assign miso = shift_reg[23];
