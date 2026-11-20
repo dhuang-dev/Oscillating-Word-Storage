@@ -19,7 +19,7 @@ module ssd_tb;
     logic [6:0]  segments;
     logic        zero_led, neg_led;
 
-    ssd_top DUT (.*);
+    SSD_top_module DUT (.*);
 
     // Override debouncer STABLE_CYCLES for fast simulation
     defparam DUT.u_db_d.STABLE_CYCLES  = 2;
